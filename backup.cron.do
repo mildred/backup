@@ -1,5 +1,9 @@
 cat >"$3" <<EOF
 
-* * * * * $(pwd)/backup
+PATH=$PATH
+
+* * * * * root $(pwd)/backup
 
 EOF
+
+chmod 0644 "$3"

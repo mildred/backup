@@ -1,4 +1,5 @@
 /backup.cron
+/backup.log
 /config
 /last-partial
 /last-full

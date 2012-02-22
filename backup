@@ -1,5 +1,9 @@
 #!/bin/bash
 
+statedir=$(cd "`dirname "$0"`"; pwd)
+
+exec >$statedir/backup.log 2>&1
+
 FLAGS=--encrypt-key=8257025A
 SRC=/srv
 DEST=scp://admin@agrippa.local/mnt/HD/HD_a2/Backup/ashley
@@ -14,10 +18,11 @@ timestamp(){
 }
 
 notice(){
+  echo "Mail from $mail_from to $mail_rcpt"
   sendmail -t <<EOF
 From: $mail_from
 To: $mail_rcpt
-Date: $(date)
+Date: $(date "+%a, %e %b %Y %H:%M:%S %z")
 Subject: $1
 
 $2
@@ -38,12 +43,12 @@ partial_age=$((now-partial_date))
 min_partial_age=$day
 max_partial_age=$((day*3))
 
-. $(cd "`dirname "$0"`"; pwd)/config
+. ./config
 
 if [[ $partial_age -lt $min_partial_age ]]; then
 
   echo "Last backup too recent"
-  notice "Last backup too recent" "test"
+  #notice "Last backup too recent" "test"
 
 else
 
