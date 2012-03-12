@@ -2,6 +2,13 @@
 
 statedir=$(cd "`dirname "$0"`"; pwd)
 
+pid="$(cat "$statedir/backup.pid" 2>/dev/null)"
+if [ -n "$pid" ] && [ -e /proc/$pid ]; then
+  echo "Already Running"
+  exit 0
+fi
+echo $$ >"$statedir/backup.pid"
+
 exec >$statedir/backup.log 2>&1
 
 FLAGS=--encrypt-key=8257025A
@@ -39,9 +46,12 @@ day=$((hour*24))
 now=$(timestamp)
 partial_date=$(cat $statedir/last-partial 2>/dev/null)
 partial_age=$((now-partial_date))
+error_date=$(cat $statedir/last-error-notification 2>/dev/null)
+error_age=$((now-error_date))
 
 min_partial_age=$day
 max_partial_age=$((day*3))
+max_error_age=$day
 
 . ./config
 
@@ -54,12 +64,16 @@ else
 
   echo "Backup in progress"
 
-  if out="$(duplicity $FLAGS $SRC $DEST 2>&1)"; then
+  if out="$(nice duplicity $FLAGS $SRC $DEST 2>&1)"; then
     timestamp > $statedir/last-partial
+    rm -f $statedir/last-error-notification
     notice "Backup OK" "$out"
   elif [[ $partial_age -gt $max_partial_age ]]; then
-    notice "Backup could not proceed" "$out"
-    echo "Too long since last backup"
+    if [[ $error_age -gt $max_error_age ]]; then
+      timestamp > $statedir/last-error-notification
+      notice "Backup could not proceed" "$out"
+      echo "Too long since last backup"
+    fi
   fi
 
 fi
