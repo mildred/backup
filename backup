@@ -20,12 +20,16 @@ mail_rcpt=`whoami`@`hostname`
 
 export PASSPHRASE=
 
+log(){
+  logger -s -t backup "$*"
+}
+
 timestamp(){
   date +%s
 }
 
 notice(){
-  echo "Mail from $mail_from to $mail_rcpt"
+  log "Mail from $mail_from to $mail_rcpt: $1"
   sendmail -t <<EOF
 From: $mail_from
 To: $mail_rcpt
@@ -55,14 +59,16 @@ max_error_age=$day
 
 . ./config
 
+log "Started"
+
 if [[ $partial_age -lt $min_partial_age ]]; then
 
-  echo "Last backup too recent"
+  log "Last backup too recent"
   #notice "Last backup too recent" "test"
 
 else
 
-  echo "Backup in progress"
+  log "Backup in progress"
 
   if out="$(nice duplicity $FLAGS $SRC $DEST 2>&1)"; then
     timestamp > $statedir/last-partial
@@ -72,11 +78,13 @@ else
     if [[ $error_age -gt $max_error_age ]]; then
       timestamp > $statedir/last-error-notification
       notice "Backup could not proceed" "$out"
-      echo "Too long since last backup"
+      log "Too long since last backup"
     fi
   fi
 
 fi
+
+log "Finished"
 
 #if duplicity full $FLAGS $SRC $DEST; then
 #  timestamp > $statedir/last-partial
