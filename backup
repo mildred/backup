@@ -21,7 +21,7 @@ mail_rcpt=`whoami`@`hostname`
 export PASSPHRASE=
 
 log(){
-  logger -s -t backup "$*"
+  logger -s -t backup -p daemon.info "$*"
 }
 
 timestamp(){
@@ -59,7 +59,7 @@ max_error_age=$day
 
 . ./config
 
-log "Started"
+: log "Started"
 
 if [[ $partial_age -lt $min_partial_age ]]; then
 
@@ -84,7 +84,7 @@ else
 
 fi
 
-log "Finished"
+: log "Finished"
 
 #if duplicity full $FLAGS $SRC $DEST; then
 #  timestamp > $statedir/last-partial
