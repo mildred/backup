@@ -4,7 +4,7 @@ statedir=$(cd "`dirname "$0"`"; pwd)
 
 pid="$(cat "$statedir/backup.pid" 2>/dev/null)"
 if [ -n "$pid" ] && [ -e /proc/$pid ]; then
-  echo "Already Running"
+  #echo "Already Running"
   exit 0
 fi
 echo $$ >"$statedir/backup.pid"
@@ -13,7 +13,7 @@ exec >$statedir/backup.log 2>&1
 
 FLAGS=--encrypt-key=8257025A
 SRC=/srv
-DEST=scp://admin@agrippa.local/mnt/HD/HD_a2/Backup/ashley
+DEST=scp://admin@agrippa.local//mnt/HD/HD_a2/Backup/ashley
 
 mail_from=`whoami`@`hostname`
 mail_rcpt=`whoami`@`hostname`
